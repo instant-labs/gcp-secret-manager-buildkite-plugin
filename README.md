@@ -10,7 +10,6 @@ Buildkite Agent machines.
 Other preinstalled requirements:
 
 - [`gcloud`](https://cloud.google.com/sdk/)
-- [`jq`](https://stedolan.github.io/jq/)
 
 ## Example
 
@@ -20,7 +19,7 @@ Add the following to your `pipeline.yml`:
 steps:
   - command: 'echo \$SECRET_VAR'
     plugins:
-      - avaly/gcp-secret-manager#v1.2.0:
+      - avaly/gcp-secret-manager#v1.4.0:
           credentials_file: /etc/gcloud-credentials.json
           env:
             SECRET_VAR: my-secret-name
@@ -38,6 +37,11 @@ Secret Accessor role for the secret being accessed (`roles/secretmanager.secretA
 ### `env` (object)
 
 An object defining the export variables names and the secret names which will populate the values.
+
+The secret names can be expressed:
+
+- using only the secret name: `{secret-name}`
+- using a fully qualified name: `projects/{project-id-or-number}/secrets/{secret-name}/versions/{version}` (if the `/versions/{version}` is not included, the `latest` version will be used)
 
 ## Developing
 
