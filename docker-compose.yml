@@ -13,6 +13,6 @@ services:
 
   shellcheck:
     image: koalaman/shellcheck-alpine:v0.11.0
-    command: ['shellcheck', '/plugin/hooks/environment']
+    command: ['shellcheck', '/plugin/hooks/environment', '/plugin/hooks/pre-exit']
     volumes:
       - ".:/plugin:ro"

@@ -49,7 +49,9 @@ environment_hook="$PWD/hooks/environment"
   export BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ENV_TARGET2="secret2"
 
   stub_buildkite_agent
-  stub gcloud "auth activate-service-account --key-file /tmp/credentials.json : "
+  stub gcloud \
+    "auth activate-service-account --key-file /tmp/credentials.json : " \
+    "config get-value account : echo 'test@test-project.iam.gserviceaccount.com'"
   stub_gcloud_secrets
 
   run "${environment_hook}"
@@ -152,7 +154,9 @@ environment_hook="$PWD/hooks/environment"
   export BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CREDENTIALS_FILE="/tmp/credentials.json"
   export BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ENV_TARGET1="secret1"
 
-  stub gcloud "auth activate-service-account --key-file /tmp/credentials.json : "
+  stub gcloud \
+    "auth activate-service-account --key-file /tmp/credentials.json : " \
+    "config get-value account : echo 'test@test-project.iam.gserviceaccount.com'"
   stub_gcloud_secrets
   stub buildkite-agent \
       'exit 1'

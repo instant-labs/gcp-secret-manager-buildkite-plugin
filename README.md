@@ -34,6 +34,9 @@ The file path of a Google Cloud [credentials file][1] which is used to access th
 [application default credential][2] will be searched for and used if available.  The account credential must have the
 Secret Accessor role for the secret being accessed (`roles/secretmanager.secretAccessor`).
 
+The plugin activates this account in the gcloud configuration of the agent user. That configuration is shared with the
+jobs which run later on the same agent. A `pre-exit` hook revokes the account at the end of the job.
+
 ### `env` (object)
 
 An object defining the export variables names and the secret names which will populate the values.
