@@ -2,15 +2,15 @@
 
 set -euo pipefail
 
-# The environment hook activates the service account in the gcloud configuration
-# of the agent user. That configuration is shared with the jobs which run later
-# on the same agent, so the account must be revoked at the end of this job.
-if [ -v BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ACTIVATED_ACCOUNT ]; then
-  echo "--- :googlecloud::key: Revoking the GCP Secret Manager credentials"
+# The environment hook gives the job its own gcloud configuration directory.
+# The directory holds the credentials of the activated service account, so it
+# must be removed at the end of the job.
+if [ -v BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CLOUDSDK_CONFIG ] && [[ -n "${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CLOUDSDK_CONFIG}" ]]; then
+  echo "--- :googlecloud::key: Removing the gcloud configuration of this job"
 
-  if ! gcloud auth revoke "${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ACTIVATED_ACCOUNT}"; then
-    echo "Failed to revoke the credentials for ${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ACTIVATED_ACCOUNT}"
-    echo "The credentials stay active in the gcloud configuration on this agent."
+  if ! rm -rf "${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CLOUDSDK_CONFIG}"; then
+    echo "Failed to remove ${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CLOUDSDK_CONFIG}"
+    echo "The service account credentials stay on this agent."
     exit 1
   fi
 fi

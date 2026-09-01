@@ -50,8 +50,8 @@ environment_hook="$PWD/hooks/environment"
 
   stub_buildkite_agent
   stub gcloud \
-    "auth activate-service-account --key-file /tmp/credentials.json : " \
-    "config get-value account : echo 'test@test-project.iam.gserviceaccount.com'"
+    "config get-value project : echo 'test-project'" \
+    "auth activate-service-account --key-file /tmp/credentials.json : "
   stub_gcloud_secrets
 
   run "${environment_hook}"
@@ -155,8 +155,8 @@ environment_hook="$PWD/hooks/environment"
   export BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ENV_TARGET1="secret1"
 
   stub gcloud \
-    "auth activate-service-account --key-file /tmp/credentials.json : " \
-    "config get-value account : echo 'test@test-project.iam.gserviceaccount.com'"
+    "config get-value project : echo 'test-project'" \
+    "auth activate-service-account --key-file /tmp/credentials.json : "
   stub_gcloud_secrets
   stub buildkite-agent \
       'exit 1'
@@ -170,6 +170,31 @@ environment_hook="$PWD/hooks/environment"
   assert_output --partial "Buildkite agent redactor is not configured. The value for TARGET1 will not be redacted in logs"
   refute_output --partial "Redacting secret in Buildkite logs for TARGET1"
 
+  unset BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CREDENTIALS_FILE
+  unset BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ENV_TARGET1
+}
+
+@test "Gives the job its own gcloud configuration" {
+  export BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CREDENTIALS_FILE="/tmp/credentials.json"
+  export BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ENV_TARGET1="secret1"
+
+  stub buildkite-agent 'exit 0'
+  stub gcloud \
+    "config get-value project : echo 'test-project'" \
+    "auth activate-service-account --key-file /tmp/credentials.json : " \
+    "secrets versions access latest --secret=secret1 '--format=get(payload.data)' : echo 'dGVzdC12YWx1ZTEK'"
+
+  # Using `run` will not populate these variables in the current shell
+  source "${environment_hook}"
+
+  assert [ -d "${CLOUDSDK_CONFIG}" ]
+  assert_equal "${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CLOUDSDK_CONFIG}" "${CLOUDSDK_CONFIG}"
+  assert_equal "${CLOUDSDK_CORE_PROJECT}" "test-project"
+
+  rm -rf "${CLOUDSDK_CONFIG}"
+  unset CLOUDSDK_CONFIG
+  unset CLOUDSDK_CORE_PROJECT
+  unset BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CLOUDSDK_CONFIG
   unset BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CREDENTIALS_FILE
   unset BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ENV_TARGET1
 }
