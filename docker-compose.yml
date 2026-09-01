@@ -7,7 +7,7 @@ services:
 
   lint:
     image: buildkite/plugin-linter:v3.0.0
-    command: ['--id', 'avaly/gcp-secret-manager']
+    command: ['--id', 'instant-labs/gcp-secret-manager']
     volumes:
       - ".:/plugin:ro"
 

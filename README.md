@@ -1,8 +1,12 @@
 # GCP Secret Manager Buildkite Plugin
 
-[![GitHub Release](https://img.shields.io/github/release/avaly/gcp-secret-manager-buildkite-plugin.svg)](https://github.com/avaly/gcp-secret-manager-buildkite-plugin/releases) [![Build status](https://badge.buildkite.com/2d6dda24352064bc947c7affb868734d615bafeecb22102007.svg?branch=master)]()
+[![GitHub Release](https://img.shields.io/github/release/instant-labs/gcp-secret-manager-buildkite-plugin.svg)](https://github.com/instant-labs/gcp-secret-manager-buildkite-plugin/releases)
 
 A [Buildkite plugin](https://buildkite.com/docs/agent/v3/plugins) to read secrets from [GCP Secret Manager](https://cloud.google.com/secret-manager).
+
+This is a fork of [avaly/gcp-secret-manager-buildkite-plugin](https://github.com/avaly/gcp-secret-manager-buildkite-plugin).
+Thanks to [@avaly](https://github.com/avaly) and to the contributors of that repository for the original plugin. The
+fork carries the changes which upstream has not merged yet.
 
 This plugin requires either a Google Cloud credentials file or application default credentials to be available on your
 Buildkite Agent machines.
@@ -19,7 +23,7 @@ Add the following to your `pipeline.yml`:
 steps:
   - command: 'echo \$SECRET_VAR'
     plugins:
-      - avaly/gcp-secret-manager#v1.4.0:
+      - instant-labs/gcp-secret-manager#v1.4.0:
           credentials_file: /etc/gcloud-credentials.json
           env:
             SECRET_VAR: my-secret-name
