@@ -24,6 +24,10 @@ function initialize() {
 
   if [ -v BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CREDENTIALS_FILE ]; then
     gcloud auth activate-service-account --key-file "${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CREDENTIALS_FILE}"
+
+    # The pre-exit hook revokes this account at the end of the job
+    BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ACTIVATED_ACCOUNT="$(gcloud config get-value account)"
+    export BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ACTIVATED_ACCOUNT
   fi
 
   initialized="1"
