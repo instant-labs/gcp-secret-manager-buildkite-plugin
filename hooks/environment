@@ -23,11 +23,27 @@ function initialize() {
   fi
 
   if [ -v BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CREDENTIALS_FILE ]; then
-    gcloud auth activate-service-account --key-file "${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CREDENTIALS_FILE}"
+    local project
 
-    # The pre-exit hook revokes this account at the end of the job
-    BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ACTIVATED_ACCOUNT="$(gcloud config get-value account)"
-    export BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_ACTIVATED_ACCOUNT
+    # The gcloud configuration of the agent user is shared with the jobs which
+    # run at the same time and later on the same agent. Read the project of the
+    # shared configuration first, because the short secret names are resolved
+    # in it.
+    project="$(gcloud config get-value project 2>/dev/null || true)"
+
+    # Give this job its own configuration, so that the account which the next
+    # command activates stays in this job.
+    CLOUDSDK_CONFIG="$(mktemp -d)"
+    export CLOUDSDK_CONFIG
+
+    # The pre-exit hook removes this directory at the end of the job
+    export BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CLOUDSDK_CONFIG="${CLOUDSDK_CONFIG}"
+
+    if [[ -n "${project}" && "${project}" != "(unset)" ]]; then
+      export CLOUDSDK_CORE_PROJECT="${project}"
+    fi
+
+    gcloud auth activate-service-account --key-file "${BUILDKITE_PLUGIN_GCP_SECRET_MANAGER_CREDENTIALS_FILE}"
   fi
 
   initialized="1"
